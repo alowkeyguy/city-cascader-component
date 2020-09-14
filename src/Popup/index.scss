@@ -1,0 +1,108 @@
+$themeColor: #1890FF;
+$hoverColor: #40A9FF;
+$textColor: #666666;
+
+
+.tab {
+  border-bottom: 1px solid #D8D8D8;
+  font-size: 14px;
+  display: flex;
+  flex-direction: row;
+
+  .cell {
+    height: 36px;
+    line-height: 36px;
+    color: $textColor;
+    padding-left: 18px;
+    padding-right: 18px;
+    transition: color .3s;
+    cursor: pointer;
+
+    &:hover {
+      color: $hoverColor;
+    }
+  }
+
+  .cellActive {
+    color: $themeColor;
+    position: relative;
+
+    &::after {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      content: '';
+      display: block;
+      height: 2px;
+      transform: translateY(70%);
+      background-color: $themeColor;
+    }
+  }
+}
+
+.board {
+
+  .boardContent {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    padding-top: 16px;
+    padding-bottom: 12px;
+    margin-left: 16px;
+    margin-right: 16px;
+    height: 200px;
+    overflow-y: auto;
+    border-bottom: 1px dotted #D8D8D8;
+  }
+
+  .borderFooter {
+    padding: 8px 16px;
+    text-align: right;
+
+    .button {
+      display: inline-block;
+      height: 28px;
+      line-height: 28px;
+      padding-left: 12px;
+      padding-right: 12px;
+      color: #9B9B9B;
+      transition: color .3s;
+      cursor: pointer;
+      border-radius: 4px;
+
+      &:hover {
+        color: $hoverColor;
+      }
+    }
+  }
+
+  .boardCell {
+    height: 28px;
+    line-height: 28px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: background-color .3s;
+
+    &:hover {
+      background-color: #E7F7FF;
+    }
+  }
+
+  .boarderCellActive {
+    background-color: #F6F6F6;
+  }
+}
+
+.popup {
+  background-color: #fff;
+  box-shadow: 0 0 8px rgba($color: #000000, $alpha: .15);
+  width: 320px;
+  overflow-y: auto;
+  border-radius: 4px;
+  overflow: hidden;
+  position: absolute;
+}
