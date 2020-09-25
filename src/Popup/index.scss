@@ -1,67 +1,118 @@
 $themeColor: #1890FF;
 $hoverColor: #40A9FF;
 $textColor: #666666;
+$classNamePrefix: 'city-cascade-popup';
 
-
-.tab {
-  border-bottom: 1px solid #D8D8D8;
-  font-size: 14px;
-  display: flex;
-  flex-direction: row;
-
-  .cell {
-    height: 36px;
-    line-height: 36px;
-    color: $textColor;
-    padding-left: 18px;
-    padding-right: 18px;
-    transition: color .3s;
-    cursor: pointer;
-
-    &:hover {
-      color: $hoverColor;
-    }
-  }
-
-  .cellActive {
-    color: $themeColor;
-    position: relative;
-
-    &::after {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      content: '';
-      display: block;
-      height: 2px;
-      transform: translateY(70%);
-      background-color: $themeColor;
-    }
-  }
+ul,
+ol,
+li {
+  list-style-type: none;
+  font-family: "SimSun", "宋体", "Arial Narrow";
+  margin: 0;
+  padding: 0;
 }
 
-.board {
+.#{$classNamePrefix} {
+  box-sizing: border-box;
 
-  .boardContent {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    padding-top: 16px;
-    padding-bottom: 12px;
-    margin-left: 16px;
-    margin-right: 16px;
-    height: 200px;
+  &-wrap {
+    background-color: #fff;
+    box-shadow: 0 0 8px rgba($color: #000000, $alpha: .15);
+    width: 320px;
     overflow-y: auto;
-    border-bottom: 1px dotted #D8D8D8;
+    border-radius: 3px;
+    overflow: hidden;
+    position: absolute;
+
   }
 
-  .borderFooter {
-    padding: 8px 16px;
-    text-align: right;
+  &-tab {
+    border-bottom: 1px solid #D8D8D8;
+    font-size: 14px;
+    overflow: hidden;
+    height: 36px;
 
-    .button {
+    &-inner {
+      // display: flex;
+      // flex-direction: row;
+      width: 1200px;
+    }
+
+
+
+    &-cell {
+      display: table-cell;
+      height: 36px;
+      line-height: 36px;
+      color: $textColor;
+      padding-left: 18px;
+      padding-right: 18px;
+      transition: color .3s;
+      cursor: pointer;
+
+      &:hover {
+        color: $hoverColor;
+      }
+    }
+
+    &-active {
+      color: $themeColor;
+      position: relative;
+
+      &::after {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        content: '';
+        display: block;
+        height: 2px;
+        transform: translateY(70%);
+        background-color: $themeColor;
+      }
+    }
+  }
+
+  &-board {
+
+    &-content {
+      overflow-y: auto;
+      border-bottom: 1px dotted #D8D8D8;
+      position: relative;
+      height: 200px;
+    }
+
+    &-city {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      padding-top: 16px;
+      padding-bottom: 12px;
+      margin-left: 16px;
+      margin-right: 16px;
+    }
+
+    &-loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba($color: #000000, $alpha: 0.45);
+      color: $themeColor;
+    }
+
+    &-footer {
+      padding: 8px 16px;
+      text-align: right;
+    }
+
+    &-button {
       display: inline-block;
       height: 28px;
       line-height: 28px;
@@ -76,33 +127,38 @@ $textColor: #666666;
         color: $hoverColor;
       }
     }
-  }
 
-  .boardCell {
-    height: 28px;
-    line-height: 28px;
-    padding-left: 12px;
-    padding-right: 12px;
-    margin-bottom: 4px;
-    cursor: pointer;
-    transition: background-color .3s;
+    &-cell {
+      height: 28px;
+      line-height: 28px;
+      padding-left: 12px;
+      padding-right: 12px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      transition: background-color .3s;
+      position: relative;
+      border-radius: 3px;
 
-    &:hover {
-      background-color: #E7F7FF;
+      &:hover {
+        background-color: #E7F7FF;
+      }
+    }
+
+    &-active {
+      background-color: #F6F6F6;
+    }
+
+    &-spin {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      background-color: rgba($color: #000000, $alpha: 0.35);
+      font-size: 18px;
+      border-radius: 3px;
     }
   }
-
-  .boarderCellActive {
-    background-color: #F6F6F6;
-  }
-}
-
-.popup {
-  background-color: #fff;
-  box-shadow: 0 0 8px rgba($color: #000000, $alpha: .15);
-  width: 320px;
-  overflow-y: auto;
-  border-radius: 4px;
-  overflow: hidden;
-  position: absolute;
 }

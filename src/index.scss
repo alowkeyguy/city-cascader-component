@@ -1,34 +1,72 @@
-.select {
-  display: inline-block;
-  position: relative;
+$classNamePrefix: 'city-cascade';
 
-  .span {
+
+.#{$classNamePrefix} {
+  &-select {
     display: inline-block;
+    position: relative;
+    border: 1px solid #d9d9d9;
+    padding: 0 11px;
+    width: 180px;
+    height: 32px;
+    box-sizing: border-box;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
   }
 
-  .input {
+  &-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  &-text {
+    flex: 1;
+    height: 100%;
+  }
+
+  &-input {
+    margin: 0;
+    padding: 0;
+    background: 0 0;
+    border: none;
+    outline: none;
+    appearance: none;
+    overflow: visible;
+    touch-action: manipulation;
+    height: 100%;
     width: 100%;
     cursor: pointer;
+    font-weight: 400;
+
+    &::placeholder {
+      color: rgba($color: #000000, $alpha: .25);
+    }
   }
 
-  .popup {
+  &-icon {
+    color: rgba($color: #000000, $alpha: .25);
+    transition: transform .3s;
+    width: 20px;
+
+
+    &-active {
+      transform: rotate(-180deg);
+    }
+  }
+
+  &-popup {
     position: absolute;
     top: 40px;
     left: 0;
     z-index: 1101;
   }
 
-  .popupTop {
+  &-popup-top {
     top: auto;
     bottom: 40px;
   }
-}
-
-.icon {
-  color: rgba($color: #000000, $alpha: .25);
-  transition: transform .3s;
-}
-
-.iconActive {
-  transform: rotate(-180deg);
 }

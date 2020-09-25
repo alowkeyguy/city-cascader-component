@@ -20,16 +20,9 @@ declare module '*.svg' {
 interface IData {
   label?: string | number
   value?: string
-  children?: IData[]
-}
-interface IPopupData {
-  tab: string
-  data: IData[]
-  value: IData
 }
 
 interface FieldName {
   label: string
   value: string
-  children: string
 }

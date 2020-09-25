@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react'
-import styles from './index.scss'
-import Chain from '../chain'
+import React, { useState, useEffect, useMemo } from 'react'
+import './index.scss'
+import { LoadingOutlined } from '@ant-design/icons'
+
+const CLASS_NAME_PREFIX = 'city-cascade-popup'
 
 interface ITab {
   tabs: string[]
@@ -10,53 +12,78 @@ interface ITab {
 
 const Tab: React.FC<ITab> = ({ tabs, onClick, currentIndex }) => {
   return (
-    <ul className={styles.tab}>
-      {tabs.map((item, i) => (
-        <li
-          key={item}
-          onClick={() => onClick(i)}
-          className={`${styles.cell} ${
-            currentIndex === i && styles.cellActive
-          }`}
-        >
-          {item}
-        </li>
-      ))}
-    </ul>
+    <div className={`${CLASS_NAME_PREFIX}-tab`}>
+      <ul className={`${CLASS_NAME_PREFIX}-tab-inner`}>
+        {tabs.map((item, i) => (
+          <li
+            key={item}
+            onClick={() => onClick(i)}
+            className={`${CLASS_NAME_PREFIX}-tab-cell ${
+              currentIndex === i && CLASS_NAME_PREFIX + '-tab-active'
+            }`}
+          >
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 
 interface IBoard {
   data: IData[]
-  value: string | number
+  value: IData
   onClick: (v: IData) => void
   onReset: () => void
   fieldNames: FieldName
+  loadingKey: string
+  boardLoading: boolean
 }
 const Board: React.FC<IBoard> = ({
   data,
   value,
   onClick,
   onReset,
-  fieldNames
+  fieldNames,
+  loadingKey,
+  boardLoading
 }) => {
   return (
-    <div className={styles.board}>
-      <div className={styles.boardContent}>
-        {data?.map((item) => (
-          <div
-            key={item[fieldNames.value]}
-            onClick={() => onClick(item)}
-            className={`${styles.boardCell} ${
-              value === item[fieldNames.value] && styles.boarderCellActive
-            }`}
-          >
-            {item[fieldNames.label]}
+    <div className={`${CLASS_NAME_PREFIX}-board`}>
+      {/* {boardLoading ? (
+        <div className={`${CLASS_NAME_PREFIX}-board-loading`}>
+          <LoadingOutlined />
+        </div>
+      ) : ( */}
+      <div className={`${CLASS_NAME_PREFIX}-board-content`}>
+        <div className={`${CLASS_NAME_PREFIX}-board-city`}>
+          {data?.map((item) => (
+            <div
+              key={item[fieldNames.value]}
+              className={`${CLASS_NAME_PREFIX}-board-cell ${
+                value[fieldNames.value] === item[fieldNames.value] &&
+                CLASS_NAME_PREFIX + '-board-active'
+              }`}
+              onClick={() => onClick(item)}
+            >
+              {item[fieldNames.label]}
+              {loadingKey === item[fieldNames.value] && (
+                <div className={`${CLASS_NAME_PREFIX}-board-spin`}>
+                  <LoadingOutlined />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        {boardLoading && (
+          <div className={`${CLASS_NAME_PREFIX}-board-loading`}>
+            <LoadingOutlined />
           </div>
-        ))}
+        )}
       </div>
-      <div className={styles.borderFooter}>
-        <span onClick={onReset} className={styles.button}>
+      {/* )} */}
+      <div className={`${CLASS_NAME_PREFIX}-board-footer`}>
+        <span onClick={onReset} className={`${CLASS_NAME_PREFIX}-board-button`}>
           重置
         </span>
       </div>
@@ -66,134 +93,96 @@ const Board: React.FC<IBoard> = ({
 
 interface IPopup {
   data: IData[]
-  tabs?: string[]
-  firstTabName?: string // 没传tabs时，需要传省份的tab名字
-  value: Array<string | number>
-  onChange: (v: Array<string | number>) => void
+  firstTabName?: string // 需要传省份的tab名字
+  value: IData[]
+  onChange: (v: IData[]) => void
   onClose: () => void
-  className?: string
-  style?: { [key: string]: string }
+  // style?: { [key: string]: string }
   onReset: () => void
   fieldNames: FieldName
+  // 选中城市后的回调
+  onCheckedCity?: (v?: IData, d?: boolean) => Promise<IData[]>
+  className?: string
 }
-
-const initDisplayData = (
-  chain: Chain<IPopupData>,
-  source: IData[],
-  target: Array<string | number>,
-  tabs: Array<string | number>,
-  fieldNames: FieldName
-) => {
-  if (!source?.length) {
-    return []
-  }
-  if (!target?.length) {
-    return []
-  }
-
-  target.reduce((pre, cur: string | number, curIndex) => {
-    const next = pre.find((e) => e[fieldNames.value] === cur)
-    if (next?.children?.length) {
-      chain.push({
-        tab: tabs?.[curIndex + 1] || next[fieldNames.label],
-        data: next.children,
-        value: next
-      })
-    }
-    return next?.children || []
-  }, source)
-  return chain
-}
-
-let popupData: Chain<IPopupData> = null
 
 const Popup: React.FC<IPopup> = ({
   data,
-  tabs,
   firstTabName = '请选择',
   value,
   onChange,
   onClose,
-  className,
-  style,
   onReset,
-  fieldNames
+  fieldNames,
+  onCheckedCity,
+  className
 }) => {
   const [index, setIndex] = useState<number>(0)
-  const [current, setCurrent] = useState<IData[]>(null)
-  const [displayTabs, setDisPlayTabs] = useState<string[]>([])
+  // 选中的省、市、镇对象集合
+  const [checkedData, setCheckedData] = useState<IData[]>([])
+  // popup展示版数据集合
+  const [popupDataList, setPopupDataList] = useState<IData[][]>([])
 
-  // useEffect(() => {
-  //   if (data?.length && !popupData?.length) {
-  //     popupData = new Chain({ tab: tabs?.[0] ?? firstTabName, value: null, data })
-  //     refreshPopup(popupData)
-  //   }
-
-  //   if (value?.length && popupData?.length === 1) {
-  //     initDisplayData(popupData, data, value, tabs, fieldNames)
-  //     // 首次展示第一项
-  //     popupData.at(0)
-  //     refreshPopup(popupData)
-  //     // 切换到城市，然后一会儿会自动跳到省份，是那个消息通知的数据更新导致的整个页面render造成的
-  //     console.log('qie换')
-  //   }
-
-  //   return () => (popupData = null)
-  // }, [data, value])
+  const [loadingKey, setLoadingKey] = useState<string>('')
+  const [boardLoading, setBoardLoading] = useState<boolean>(false)
 
   useEffect(() => {
-    if (data?.length && !popupData?.length) {
-      popupData = new Chain({
-        tab: tabs?.[0] || firstTabName,
-        value: null,
-        data
-      })
-      refreshPopup(popupData)
+    if (data?.length) {
+      setPopupDataList([data])
+    }
+  }, [data])
+
+  useEffect(() => {
+    if (value?.length) {
+      setCheckedData(value.filter((e, i) => i !== value.length - 1))
+    }
+  }, [value])
+
+  // 当前popup展示的城市列表
+  const currentPopup = useMemo(() => popupDataList?.[index] || [], [
+    index,
+    popupDataList
+  ]) as IData[]
+
+  const handleBoard = async (v: IData) => {
+    let child: IData[]
+    if (onCheckedCity) {
+      setLoadingKey(v[fieldNames.value])
+      const res = await onCheckedCity(v)
+      if (res) {
+        child = res
+      }
+      setLoadingKey('')
     }
 
-    if (value?.length && popupData?.length === 1) {
-      initDisplayData(popupData, data, value, tabs, fieldNames)
-      // 首次展示第一项
-      popupData.at(0)
-      refreshPopup(popupData)
-      // 切换到城市，然后一会儿会自动跳到省份，是那个消息通知的数据更新导致的整个页面render造成的
-      // console.log('qie换')
-    }
-
-    return () => (popupData = null)
-  }, [])
-
-  const refreshPopup = (v: Chain<IPopupData>) => {
-    const curr = v.pointer
-    setCurrent(curr.element.data)
-
-    setIndex(curr.index)
-    setDisPlayTabs(tabs.slice(0, v.length))
-  }
-
-  const handleBoard = (v: IData) => {
-    const child = v[fieldNames.children] || []
-    if (child.length > 0) {
-      popupData.removeAfterPointer()
-      popupData.push({
-        tab: tabs?.[index] || v[fieldNames.label],
-        data: child,
-        value: v
-      })
-      refreshPopup(popupData)
+    if (child?.length) {
+      if (index + 1 === labels.length) {
+        setCheckedData((pre) => [...pre, v])
+        setPopupDataList((pre) => [...pre, child])
+      } else {
+        setCheckedData((pre) => [...pre.filter((e, i) => i <= index), v])
+        setPopupDataList((pre) => [...pre.filter((e, i) => i <= index), child])
+      }
+      setIndex((pre) => pre + 1)
     } else {
-      onChange([
-        ...popupData.map((e) => e.value?.[fieldNames.value]),
-        v[fieldNames.value]
-      ])
+      onChange([...checkedData, v])
       onClose()
     }
   }
 
-  const handleTab = (i) => {
+  const handleTab = async (i) => {
     if (i !== index) {
-      popupData.at(i)
-      refreshPopup(popupData)
+      if (i !== 0 && !popupDataList[i]) {
+        setBoardLoading(true)
+        const res = await onCheckedCity(checkedData[i - 1], true)
+        res &&
+          setPopupDataList((pre) => {
+            pre[i] = res
+            console.log('pre', pre, i)
+            return [...pre]
+          })
+        setBoardLoading(false)
+      }
+      setIndex(i)
     }
   }
 
@@ -202,18 +191,29 @@ const Popup: React.FC<IPopup> = ({
     onClose()
   }
 
+  const currentValue = useMemo(() => checkedData?.[index] || {}, [
+    index,
+    checkedData
+  ])
+
+  const labels = useMemo(
+    () => [firstTabName, ...checkedData.map((d) => d[fieldNames.label])],
+    [checkedData]
+  )
+
   return (
     <div
-      style={style}
       onClick={(e) => e.stopPropagation()}
-      className={`${styles.popup} ${className}`}
+      className={`${CLASS_NAME_PREFIX}-wrap ${className}`}
     >
-      <Tab onClick={handleTab} tabs={displayTabs} currentIndex={index} />
+      <Tab onClick={handleTab} tabs={labels} currentIndex={index} />
       <Board
+        loadingKey={loadingKey}
+        boardLoading={boardLoading}
         onReset={handleReset}
         onClick={handleBoard}
-        data={current}
-        value={value?.[index]}
+        data={currentPopup}
+        value={currentValue}
         fieldNames={fieldNames}
       />
     </div>
