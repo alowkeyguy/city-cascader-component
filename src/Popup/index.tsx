@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import './index.scss'
-import { LoadingOutlined } from '@ant-design/icons'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
+import { LoadingOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons'
 
 const CLASS_NAME_PREFIX = 'city-cascade-popup'
 
@@ -10,22 +9,58 @@ interface ITab {
   currentIndex: number
 }
 
+const getScrollLeft = (ulElement: HTMLUListElement) => {
+  const childCollection = ulElement?.children
+
+  if (childCollection?.length > 0) {
+    const scrollWidth = Array.from(
+      { length },
+      (_v, i) => childCollection[i]
+    ).reduce((pre, cur) => pre + cur.clientWidth, 0)
+
+    return scrollWidth - ulElement.clientWidth
+  }
+
+  return 0
+}
+
 const Tab: React.FC<ITab> = ({ tabs, onClick, currentIndex }) => {
+  const ref = useRef<HTMLUListElement>(null)
+  const [scrollLeft, setScrollLeft] = useState<number>(0)
+
+  useEffect(() => {
+    ref?.current && setScrollLeft(getScrollLeft(ref.current))
+  }, [tabs])
+
+  const handleArrow = (v: 'LEFT' | 'RIGHT') => {
+    console.log('v', v)
+  }
+
   return (
     <div className={`${CLASS_NAME_PREFIX}-tab`}>
-      <ul className={`${CLASS_NAME_PREFIX}-tab-inner`}>
-        {tabs.map((item, i) => (
-          <li
-            key={item}
-            onClick={() => onClick(i)}
-            className={`${CLASS_NAME_PREFIX}-tab-cell ${
-              currentIndex === i && CLASS_NAME_PREFIX + '-tab-active'
-            }`}
-          >
-            {item}
-          </li>
-        ))}
-      </ul>
+      <div className={`${CLASS_NAME_PREFIX}-tab-icon`}>
+        {scrollLeft > 0 && <LeftOutlined onClick={() => handleArrow('LEFT')} />}
+      </div>
+      <div className={`${CLASS_NAME_PREFIX}-tab-content`}>
+        <ul ref={ref} className={`${CLASS_NAME_PREFIX}-tab-inner`}>
+          {tabs.map((item, i) => (
+            <li
+              key={item}
+              onClick={() => onClick(i)}
+              className={`${CLASS_NAME_PREFIX}-tab-cell ${
+                currentIndex === i && CLASS_NAME_PREFIX + '-tab-active'
+              }`}
+            >
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className={`${CLASS_NAME_PREFIX}-tab-icon`}>
+        {scrollLeft > 0 && (
+          <RightOutlined onClick={() => handleArrow('RIGHT')} />
+        )}
+      </div>
     </div>
   )
 }
@@ -50,11 +85,6 @@ const Board: React.FC<IBoard> = ({
 }) => {
   return (
     <div className={`${CLASS_NAME_PREFIX}-board`}>
-      {/* {boardLoading ? (
-        <div className={`${CLASS_NAME_PREFIX}-board-loading`}>
-          <LoadingOutlined />
-        </div>
-      ) : ( */}
       <div className={`${CLASS_NAME_PREFIX}-board-content`}>
         <div className={`${CLASS_NAME_PREFIX}-board-city`}>
           {data?.map((item) => (

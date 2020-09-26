@@ -29,22 +29,42 @@ li {
   &-tab {
     border-bottom: 1px solid #D8D8D8;
     font-size: 14px;
-    // overflow: hidden;
-    height: 36px;
+    // height: 36px;
+    padding-left: 4px;
+    padding-right: 4px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+
+
+    &-icon {
+      width: 20px;
+      height: 36px;
+      line-height: 36px;
+      color: #9B9B9B;
+      transition: color .3s;
+
+      &:hover {
+        color: $hoverColor;
+      }
+    }
+
+    &-content {
+      flex: 1;
+      overflow-x: auto;
+    }
 
     &-inner {
       white-space: nowrap;
     }
-
-
 
     &-cell {
       display: table-cell;
       height: 36px;
       line-height: 36px;
       color: $textColor;
-      padding-left: 18px;
-      padding-right: 18px;
+      padding-left: 10px;
+      padding-right: 10px;
       transition: color .3s;
       cursor: pointer;
 

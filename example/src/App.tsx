@@ -151,7 +151,13 @@ const data = [
                 loadData: [
                   {
                     label: '芒果往大厦',
-                    value: 'mangguow'
+                    value: 'mangguow',
+                    loadData: [
+                      {
+                        label: '芒果往大厦_levei',
+                        value: 'mgw_level'
+                      }
+                    ]
                   },
                   {
                     label: '腾讯大厦',
