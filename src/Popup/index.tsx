@@ -93,7 +93,7 @@ const Board: React.FC<IBoard> = ({
 
 interface IPopup {
   data: IData[]
-  firstTabName?: string // 需要传省份的tab名字
+  firstTabName: string // 需要传省份的tab名字
   value: IData[]
   onChange: (v: IData[]) => void
   onClose: () => void
@@ -101,7 +101,7 @@ interface IPopup {
   onReset: () => void
   fieldNames: FieldName
   // 选中城市后的回调
-  onCheckedCity?: (v?: IData, d?: boolean) => Promise<IData[]>
+  onCheckedCity?: (v?: IData) => Promise<IData[]>
   className?: string
 }
 
@@ -144,27 +144,22 @@ const Popup: React.FC<IPopup> = ({
   ]) as IData[]
 
   const handleBoard = async (v: IData) => {
-    let child: IData[]
+    let next: IData[]
     if (onCheckedCity) {
       setLoadingKey(v[fieldNames.value])
       const res = await onCheckedCity(v)
       if (res) {
-        child = res
+        next = res
       }
       setLoadingKey('')
     }
 
-    if (child?.length) {
-      if (index + 1 === labels.length) {
-        setCheckedData((pre) => [...pre, v])
-        setPopupDataList((pre) => [...pre, child])
-      } else {
-        setCheckedData((pre) => [...pre.filter((e, i) => i <= index), v])
-        setPopupDataList((pre) => [...pre.filter((e, i) => i <= index), child])
-      }
+    if (next?.length) {
+      setCheckedData((pre) => [...pre.filter((e, i) => i < index), v])
+      setPopupDataList((pre) => [...pre.filter((e, i) => i <= index), next])
       setIndex((pre) => pre + 1)
     } else {
-      onChange([...checkedData, v])
+      onChange([...checkedData.filter((e, i) => i < index), v])
       onClose()
     }
   }
@@ -173,11 +168,10 @@ const Popup: React.FC<IPopup> = ({
     if (i !== index) {
       if (i !== 0 && !popupDataList[i]) {
         setBoardLoading(true)
-        const res = await onCheckedCity(checkedData[i - 1], true)
+        const res = await onCheckedCity(checkedData[i - 1])
         res &&
           setPopupDataList((pre) => {
             pre[i] = res
-            console.log('pre', pre, i)
             return [...pre]
           })
         setBoardLoading(false)

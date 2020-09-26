@@ -29,13 +29,11 @@ li {
   &-tab {
     border-bottom: 1px solid #D8D8D8;
     font-size: 14px;
-    overflow: hidden;
+    // overflow: hidden;
     height: 36px;
 
     &-inner {
-      // display: flex;
-      // flex-direction: row;
-      width: 1200px;
+      white-space: nowrap;
     }
 
 

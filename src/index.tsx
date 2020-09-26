@@ -19,7 +19,8 @@ interface IProps {
   disabled?: boolean
   fieldNames?: FieldName
   placeholder?: string
-  onCheckedCity?: (v?: IData, d?: boolean) => Promise<any>
+  onCheckedCity?: (v?: IData) => Promise<any>
+  firstTabName?: string
 }
 
 const CityCascade: React.FC<IProps> = ({
@@ -31,7 +32,8 @@ const CityCascade: React.FC<IProps> = ({
   onChange,
   fieldNames = DEFAULT_FIELD_NAME,
   onCheckedCity,
-  placeholder = '请选择'
+  placeholder = '请选择',
+  firstTabName = '省份'
 }) => {
   const [popupVisible, setPopupVisible] = useState<boolean>(false)
   const [popupPosition, setPopupPosition] = useState<string>(null)
@@ -130,6 +132,7 @@ const CityCascade: React.FC<IProps> = ({
           onReset={() => handleChange([])}
           fieldNames={fieldNames}
           onCheckedCity={onCheckedCity}
+          firstTabName={firstTabName}
         />
       )}
     </div>

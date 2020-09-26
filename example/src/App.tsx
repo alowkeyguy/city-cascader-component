@@ -1,25 +1,12 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import CityCascader from 'city-cascader-component'
 import 'city-cascader-component/dist/index.css'
 
 const data = [
   {
-    label: '水果',
-    value: 'shuiguo',
-    children: [],
-    loadData: [
-      {
-        label: '香蕉',
-        value: 'balana',
-        children: []
-      }
-    ]
-  },
-  {
-    label: '省份',
+    label: '湖北',
     value: 'provicen',
-    children: [],
     loadData: [
       {
         label: '荆州',
@@ -56,17 +43,123 @@ const data = [
           {
             label: '熊口',
             value: 'xk',
-            children: []
+            children: [],
+            loadData: [
+              {
+                label: '胸口_1',
+                value: 'xk_1',
+                children: []
+              },
+              {
+                label: '胸口_2',
+                value: 'xk_2',
+                children: []
+              }
+            ]
           },
           {
             label: '浩口',
             value: 'hk',
-            children: []
+            children: [
+              {
+                label: '浩口_1',
+                value: 'hk_1',
+                children: []
+              },
+              {
+                label: '浩口_2',
+                value: 'hk_2',
+                children: []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    label: '广东',
+    value: 'guandong',
+    loadData: [
+      {
+        label: '广州',
+        value: 'guangzhou',
+        loadData: [
+          {
+            label: '白云区',
+            value: 'baiyun'
           },
           {
-            label: '张金',
-            value: 'zj',
-            children: []
+            label: '番禺区',
+            value: 'pangyu'
+          },
+          {
+            label: '珠江新城',
+            value: 'zhujiang'
+          },
+          {
+            label: '猎德',
+            value: 'liede'
+          }
+        ]
+      },
+      {
+        label: '深圳',
+        value: 'shengzheng',
+        loadData: [
+          {
+            label: '宝安区',
+            value: 'baoan',
+            loadData: [
+              {
+                label: '西乡街道',
+                value: 'xixiangLoad',
+                loadData: [
+                  {
+                    label: '西乡',
+                    value: 'xixiang'
+                  },
+                  {
+                    label: '平洲',
+                    value: 'pz'
+                  }
+                ]
+              },
+              {
+                label: '东乡街道',
+                value: 'dongxiangLoad',
+                loadData: [
+                  {
+                    label: '西乡',
+                    value: 'dongxiang'
+                  },
+                  {
+                    label: '东洲',
+                    value: 'dz'
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            label: '南山区',
+            value: 'nansan',
+            loadData: [
+              {
+                label: '后海街道',
+                value: 'houhai',
+                loadData: [
+                  {
+                    label: '芒果往大厦',
+                    value: 'mangguow'
+                  },
+                  {
+                    label: '腾讯大厦',
+                    value: 'tenxun'
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -83,22 +176,16 @@ const data = [
 //   }))
 
 const App = () => {
-  const [index, setIndex] = useState(0)
 
 
   const handleChange = (e: any) => {
     console.log(e)
   }
 
-  const fetchData = async (v: any, s = false) => {
-    console.log(v, s)
-    if (!s && index > 3) {
-      return Promise.resolve(false)
-    }
-    !s && setIndex((pre) => pre + 1)
+  const fetchData = async (v: any) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(v.loadData)
+        resolve(v.loadData || false)
       }, 500);
     })
   }
@@ -110,6 +197,7 @@ const App = () => {
         data={data}
         onChange={handleChange}
         onCheckedCity={fetchData}
+        firstTabName='level_1'
       />
     </div>
   )
