@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { LoadingOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons'
+import './index.scss'
 
 const CLASS_NAME_PREFIX = 'city-cascade-popup'
+const STEP = 40
 
 interface ITab {
   tabs: string[]
@@ -11,14 +13,14 @@ interface ITab {
 
 const getScrollLeft = (ulElement: HTMLUListElement) => {
   const childCollection = ulElement?.children
-
-  if (childCollection?.length > 0) {
+  const len = childCollection?.length || 0
+  if (len > 0) {
     const scrollWidth = Array.from(
-      { length },
+      { length: len },
       (_v, i) => childCollection[i]
     ).reduce((pre, cur) => pre + cur.clientWidth, 0)
 
-    return scrollWidth - ulElement.clientWidth
+    return Math.max(scrollWidth - ulElement.clientWidth, 0)
   }
 
   return 0
@@ -27,22 +29,56 @@ const getScrollLeft = (ulElement: HTMLUListElement) => {
 const Tab: React.FC<ITab> = ({ tabs, onClick, currentIndex }) => {
   const ref = useRef<HTMLUListElement>(null)
   const [scrollLeft, setScrollLeft] = useState<number>(0)
+  const [transformX, setTransformX] = useState<number>(0)
+
+  const transformStyle = useMemo(
+    () => ({
+      transform: `translateX(${transformX}px)`
+    }),
+    [transformX]
+  )
+
+  const [disableLeft, disableRight] = useMemo(
+    () =>
+      scrollLeft
+        ? [transformX === 0, transformX === -scrollLeft]
+        : [true, true],
+    [scrollLeft, transformX]
+  )
 
   useEffect(() => {
     ref?.current && setScrollLeft(getScrollLeft(ref.current))
   }, [tabs])
 
-  const handleArrow = (v: 'LEFT' | 'RIGHT') => {
-    console.log('v', v)
+  const handleArrow = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    v: 'LEFT' | 'RIGHT'
+  ) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (v === 'RIGHT' && !disableRight) {
+      setTransformX((pre) => Math.max(pre - STEP, -scrollLeft))
+    } else if (v === 'LEFT' && !disableLeft) {
+      setTransformX((pre) => Math.min(pre + STEP, 0))
+    }
   }
 
   return (
     <div className={`${CLASS_NAME_PREFIX}-tab`}>
-      <div className={`${CLASS_NAME_PREFIX}-tab-icon`}>
-        {scrollLeft > 0 && <LeftOutlined onClick={() => handleArrow('LEFT')} />}
-      </div>
+      <a
+        onClick={(e) => handleArrow(e, 'LEFT')}
+        className={`${CLASS_NAME_PREFIX}-tab-icon ${
+          scrollLeft > 0 && CLASS_NAME_PREFIX + '-tab-icon-active'
+        }`}
+      >
+        <LeftOutlined />
+      </a>
       <div className={`${CLASS_NAME_PREFIX}-tab-content`}>
-        <ul ref={ref} className={`${CLASS_NAME_PREFIX}-tab-inner`}>
+        <ul
+          ref={ref}
+          style={transformStyle}
+          className={`${CLASS_NAME_PREFIX}-tab-inner`}
+        >
           {tabs.map((item, i) => (
             <li
               key={item}
@@ -56,11 +92,14 @@ const Tab: React.FC<ITab> = ({ tabs, onClick, currentIndex }) => {
           ))}
         </ul>
       </div>
-      <div className={`${CLASS_NAME_PREFIX}-tab-icon`}>
-        {scrollLeft > 0 && (
-          <RightOutlined onClick={() => handleArrow('RIGHT')} />
-        )}
-      </div>
+      <a
+        onClick={(e) => handleArrow(e, 'RIGHT')}
+        className={`${CLASS_NAME_PREFIX}-tab-icon ${
+          scrollLeft > 0 && CLASS_NAME_PREFIX + '-tab-icon-active'
+        }`}
+      >
+        <RightOutlined />
+      </a>
     </div>
   )
 }
@@ -111,7 +150,6 @@ const Board: React.FC<IBoard> = ({
           </div>
         )}
       </div>
-      {/* )} */}
       <div className={`${CLASS_NAME_PREFIX}-board-footer`}>
         <span onClick={onReset} className={`${CLASS_NAME_PREFIX}-board-button`}>
           重置
